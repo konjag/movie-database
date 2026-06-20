@@ -1,65 +1,153 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useCallback, useEffect, useState } from "react";
+import { useMovieSearch } from "@/features/movie-search/model/use-movie-search";
+import { SearchForm } from "@/features/movie-search/ui/search-form";
+import { useMovieFilters } from "@/features/movie-filter/model/use-movie-filters";
+import { useFilteredMovies } from "@/features/movie-filter/model/use-filtered-movies";
+import { FilterForm } from "@/features/movie-filter/ui/filter-form";
+import { Pagination } from "@/features/movie-pagination/ui/pagination";
+import { MovieList } from "@/widgets/movie-list/ui/movie-list";
+import { Spinner } from "@/shared/ui/spinner";
+import { ErrorMessage } from "@/shared/ui/error-message";
+import { EmptyState } from "@/shared/ui/empty-state";
+
+export default function HomePage() {
+  const { filters, setYear, setGenre, resetFilters } = useMovieFilters();
+  const { results, isLoading, error, pagination, executeSearch } = useMovieSearch();
+  const {
+    movies: genreFilteredMovies,
+    isLoading: isFilteringGenre,
+    error: genreFilterError,
+    applyGenreFilter,
+    reset: resetGenreFilter,
+  } = useFilteredMovies();
+
+  const [lastSearchQuery, setLastSearchQuery] = useState("");
+  const [activeGenre, setActiveGenre] = useState("");
+
+  const handleSearch = useCallback(
+    async (query: string, page = 1) => {
+      setLastSearchQuery(query);
+      setActiveGenre("");
+      resetGenreFilter();
+      await executeSearch({ query, page, year: filters.year ? Number(filters.year) : undefined });
+    },
+    [executeSearch, filters.year, resetGenreFilter]
+  );
+
+  const handleApplyFilters = useCallback(async () => {
+    if (!lastSearchQuery) return;
+
+    setActiveGenre(filters.genre);
+    resetGenreFilter();
+
+    await executeSearch({
+      query: lastSearchQuery,
+      page: 1,
+      year: filters.year ? Number(filters.year) : undefined,
+    });
+  }, [executeSearch, filters, lastSearchQuery, resetGenreFilter]);
+
+  const handleResetFilters = useCallback(() => {
+    resetFilters();
+    setActiveGenre("");
+    resetGenreFilter();
+    if (lastSearchQuery) {
+      executeSearch({ query: lastSearchQuery, page: 1 });
+    }
+  }, [resetFilters, resetGenreFilter, lastSearchQuery, executeSearch]);
+
+  const handlePageChange = useCallback(
+    async (page: number) => {
+      if (!lastSearchQuery) return;
+
+      setActiveGenre("");
+      resetGenreFilter();
+
+      await executeSearch({
+        query: lastSearchQuery,
+        page,
+        year: filters.year ? Number(filters.year) : undefined,
+      });
+    },
+    [executeSearch, filters.year, lastSearchQuery, resetGenreFilter]
+  );
+
+  useEffect(() => {
+    if (results.length > 0 && activeGenre) {
+      applyGenreFilter(results, activeGenre);
+    }
+  }, [results, activeGenre, applyGenreFilter]);
+
+  const displayMovies = activeGenre ? genreFilteredMovies : results;
+  const isBusy = isLoading || isFilteringGenre;
+  const displayError = error || genreFilterError;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
+      <h1 className="text-2xl font-semibold tracking-tight">Discover movies</h1>
+      <p className="mt-2 text-muted">Search the OMDb database for your favourite films.</p>
+
+      <div className="mt-8 space-y-6">
+        <SearchForm onSearch={(query) => handleSearch(query)} isLoading={isBusy} />
+
+        <FilterForm
+          filters={filters}
+          onYearChange={setYear}
+          onGenreChange={setGenre}
+          onSubmit={handleApplyFilters}
+          onReset={handleResetFilters}
+          isLoading={isBusy}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+
+        {activeGenre && (
+          <p className="text-sm text-muted">
+            Showing movies on this page that match the &quot;{activeGenre}&quot; genre.
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+        )}
+
+        {displayError && (
+          <ErrorMessage
+            title="Could not load movies"
+            message={displayError}
+            onRetry={() => handleSearch(lastSearchQuery || "", pagination.currentPage)}
+            className="my-6"
+          />
+        )}
+
+        {isBusy && <Spinner className="my-12" />}
+
+        {!isBusy && !displayError && lastSearchQuery && displayMovies.length === 0 && (
+          <EmptyState
+            title="No movies found"
+            description="Try a different search term or adjust your filters."
+            className="my-8"
+          />
+        )}
+
+        {!isBusy && !displayError && displayMovies.length > 0 && (
+          <>
+            <MovieList movies={displayMovies} className="mt-6" />
+            {!activeGenre && (
+              <Pagination
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                onPageChange={handlePageChange}
+                className="mt-8"
+              />
+            )}
+          </>
+        )}
+
+        {!isBusy && !lastSearchQuery && displayMovies.length === 0 && !displayError && (
+          <EmptyState
+            title="Start your search"
+            description="Enter a movie title above to see results."
+            className="my-8"
+          />
+        )}
+      </div>
+    </main>
   );
 }
