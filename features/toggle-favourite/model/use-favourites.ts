@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useSyncExternalStore } from "react";
+import { useCallback, useState, useSyncExternalStore } from "react";
 import { MovieSearchResult } from "@/entities/movie/model/types";
 
 const STORAGE_KEY = "movie-database-favourites";
@@ -40,36 +40,49 @@ function subscribe(callback: () => void): () => void {
   return () => window.removeEventListener(CHANGE_EVENT, handler);
 }
 
-function saveFavourites(favourites: MovieSearchResult[]) {
-  if (typeof window === "undefined") return;
+function saveFavourites(favourites: MovieSearchResult[]): boolean {
+  if (typeof window === "undefined") return false;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(favourites));
     cachedFavourites = favourites;
     window.dispatchEvent(new Event(CHANGE_EVENT));
+    return true;
   } catch {
-    // Ignore localStorage errors
+    return false;
   }
 }
 
 export function useFavourites() {
+  const [error, setError] = useState<string | null>(null);
   const favourites = useSyncExternalStore(subscribe, getFavourites, getServerSnapshot);
+
+  const clearError = useCallback(() => setError(null), []);
+
+  const persistFavourites = useCallback((updated: MovieSearchResult[]) => {
+    const success = saveFavourites(updated);
+    if (!success) {
+      setError("Could not save favourites. They may not persist.");
+    } else {
+      setError(null);
+    }
+  }, []);
 
   const addFavourite = useCallback(
     (movie: MovieSearchResult) => {
       const updated = favourites.some((item) => item.imdbID === movie.imdbID)
         ? favourites
         : [...favourites, movie];
-      saveFavourites(updated);
+      persistFavourites(updated);
     },
-    [favourites]
+    [favourites, persistFavourites]
   );
 
   const removeFavourite = useCallback(
     (id: string) => {
       const updated = favourites.filter((movie) => movie.imdbID !== id);
-      saveFavourites(updated);
+      persistFavourites(updated);
     },
-    [favourites]
+    [favourites, persistFavourites]
   );
 
   const toggleFavourite = useCallback(
@@ -78,9 +91,9 @@ export function useFavourites() {
       const updated = exists
         ? favourites.filter((item) => item.imdbID !== movie.imdbID)
         : [...favourites, movie];
-      saveFavourites(updated);
+      persistFavourites(updated);
     },
-    [favourites]
+    [favourites, persistFavourites]
   );
 
   const isFavourite = useCallback(
@@ -90,10 +103,12 @@ export function useFavourites() {
 
   return {
     favourites,
+    error,
     isReady: true,
     isFavourite,
     addFavourite,
     removeFavourite,
     toggleFavourite,
+    clearError,
   };
 }

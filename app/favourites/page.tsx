@@ -4,11 +4,12 @@ import { MovieCard } from "@/entities/movie/ui/movie-card";
 import { useFavourites } from "@/features/toggle-favourite/model/use-favourites";
 import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
+import { ErrorMessage } from "@/shared/ui/error-message";
 import { Spinner } from "@/shared/ui/spinner";
 import { Trash2 } from "lucide-react";
 
 export default function FavouritesPage() {
-  const { favourites, isReady, removeFavourite } = useFavourites();
+  const { favourites, isReady, error, removeFavourite, clearError } = useFavourites();
 
   if (!isReady) {
     return (
@@ -37,6 +38,15 @@ export default function FavouritesPage() {
       <p className="mt-2 text-muted">
         {favourites.length} {favourites.length === 1 ? "movie" : "movies"} saved
       </p>
+
+      {error && (
+        <ErrorMessage
+          title="Could not update favourites"
+          message={error}
+          onRetry={clearError}
+          className="mt-6"
+        />
+      )}
 
       <ul
         className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"

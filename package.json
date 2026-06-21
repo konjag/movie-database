@@ -12,7 +12,8 @@
     "format:check": "prettier --check .",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "clsx": "^2.1.1",

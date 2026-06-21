@@ -79,18 +79,19 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Available scripts
 
-| Script                  | Description                                   |
-| ----------------------- | --------------------------------------------- |
-| `npm run dev`           | Start the development server with Turbopack.  |
-| `npm run build`         | Create an optimized production build.         |
-| `npm start`             | Start the production server (after building). |
-| `npm run lint`          | Run ESLint.                                   |
-| `npm run lint:fix`      | Run ESLint and auto-fix issues.               |
-| `npm run format`        | Format all files with Prettier.               |
-| `npm run format:check`  | Check formatting without writing files.       |
-| `npm test`              | Run the Jest test suite.                      |
-| `npm run test:watch`    | Run Jest in watch mode.                       |
-| `npm run test:coverage` | Run Jest with coverage report.                |
+| Script                  | Description                                          |
+| ----------------------- | ---------------------------------------------------- |
+| `npm run dev`           | Start the development server with Turbopack.         |
+| `npm run build`         | Create an optimized production build.                |
+| `npm start`             | Start the production server (after building).        |
+| `npm run lint`          | Run ESLint.                                          |
+| `npm run lint:fix`      | Run ESLint and auto-fix issues.                      |
+| `npm run format`        | Format all files with Prettier.                      |
+| `npm run format:check`  | Check formatting without writing files.              |
+| `npm run type-check`    | Run TypeScript type checking without emitting files. |
+| `npm test`              | Run the Jest test suite.                             |
+| `npm run test:watch`    | Run Jest in watch mode.                              |
+| `npm run test:coverage` | Run Jest with coverage report.                       |
 
 ## Notes
 

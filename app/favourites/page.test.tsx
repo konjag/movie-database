@@ -20,11 +20,13 @@ describe("FavouritesPage", () => {
   it("renders empty state when there are no favourites", () => {
     useFavourites.mockReturnValue({
       favourites: [],
+      error: null,
       isReady: true,
       isFavourite: jest.fn(),
       addFavourite: jest.fn(),
       removeFavourite: mockRemoveFavourite,
       toggleFavourite: jest.fn(),
+      clearError: jest.fn(),
     });
 
     render(<FavouritesPage />);
@@ -44,11 +46,13 @@ describe("FavouritesPage", () => {
           Poster: "https://m.media-amazon.com/images/poster.jpg",
         },
       ],
+      error: null,
       isReady: true,
       isFavourite: jest.fn(),
       addFavourite: jest.fn(),
       removeFavourite: mockRemoveFavourite,
       toggleFavourite: jest.fn(),
+      clearError: jest.fn(),
     });
 
     render(<FavouritesPage />);
@@ -68,11 +72,13 @@ describe("FavouritesPage", () => {
           Poster: "https://m.media-amazon.com/images/poster.jpg",
         },
       ],
+      error: null,
       isReady: true,
       isFavourite: jest.fn(),
       addFavourite: jest.fn(),
       removeFavourite: mockRemoveFavourite,
       toggleFavourite: jest.fn(),
+      clearError: jest.fn(),
     });
 
     render(<FavouritesPage />);

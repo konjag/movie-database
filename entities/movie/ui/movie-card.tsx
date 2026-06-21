@@ -20,7 +20,7 @@ export function MovieCard({ movie, className, action }: MovieCardProps) {
   return (
     <article
       className={cn(
-        "group flex flex-col overflow-hidden rounded-lg border border-border bg-background transition-shadow hover:shadow-md",
+        "group flex h-full flex-col overflow-hidden rounded-lg border border-border bg-background transition-shadow hover:shadow-md",
         className
       )}
     >
@@ -45,7 +45,7 @@ export function MovieCard({ movie, className, action }: MovieCardProps) {
         )}
       </Link>
       <div className="flex flex-1 flex-col p-4">
-        <h3 className="line-clamp-2 font-semibold leading-tight">
+        <h3 className="line-clamp-2 min-h-[2.5em] font-semibold leading-tight">
           <Link
             href={`/movie/${movie.imdbID}`}
             className="hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
