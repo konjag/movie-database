@@ -21,7 +21,7 @@ export function Navbar() {
           className="flex items-center gap-2 text-lg font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
           <Film className="h-6 w-6 text-primary" aria-hidden="true" />
-          <span>Movie Database</span>
+          <span className="leading-4">Movie Database</span>
         </Link>
 
         <ul className="ml-auto flex items-center gap-1">

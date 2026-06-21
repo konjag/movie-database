@@ -5,16 +5,17 @@ import { MovieSearchResult } from "@/entities/movie/model/types";
 
 const STORAGE_KEY = "movie-database-favourites";
 const CHANGE_EVENT = "movie-database-favourites-change";
+const EMPTY_FAVOURITES: MovieSearchResult[] = [];
 
 let cachedFavourites: MovieSearchResult[] | null = null;
 
 function parseStoredFavourites(): MovieSearchResult[] {
-  if (typeof window === "undefined") return [];
+  if (typeof window === "undefined") return EMPTY_FAVOURITES;
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
+    return stored ? (JSON.parse(stored) as MovieSearchResult[]) : EMPTY_FAVOURITES;
   } catch {
-    return [];
+    return EMPTY_FAVOURITES;
   }
 }
 
@@ -23,6 +24,10 @@ function getFavourites(): MovieSearchResult[] {
     cachedFavourites = parseStoredFavourites();
   }
   return cachedFavourites;
+}
+
+function getServerSnapshot(): MovieSearchResult[] {
+  return EMPTY_FAVOURITES;
 }
 
 function subscribe(callback: () => void): () => void {
@@ -47,7 +52,7 @@ function saveFavourites(favourites: MovieSearchResult[]) {
 }
 
 export function useFavourites() {
-  const favourites = useSyncExternalStore(subscribe, getFavourites, () => []);
+  const favourites = useSyncExternalStore(subscribe, getFavourites, getServerSnapshot);
 
   const addFavourite = useCallback(
     (movie: MovieSearchResult) => {
